@@ -45,7 +45,7 @@ clean:
 
 # git push origin v1.0.0
 git_set_tag:
-	-git tag v0.0.11
+	-git tag v0.1.0
 	( cd ./lib/version ; ../../bin/generate-git-commit.sh )
 	git add lib/version/gitcommit.go
 	git commit -m "Update Tag"
