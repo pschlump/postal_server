@@ -14,6 +14,7 @@ import (
 
 	ginzerolog "github.com/dn365/gin-zerolog"
 	"github.com/gin-gonic/gin"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 
@@ -205,6 +206,10 @@ func ExpandAddressHandler(c *gin.Context) {
 			queryParams,
 		),
 	)
+
+	// Record custom metrics
+	RecordExpandMetrics(len(address), len(expansions), "success")
+
 	c.JSON(http.StatusOK, expansions)
 }
 
@@ -232,6 +237,10 @@ func ParseAddressHandler(c *gin.Context) {
 			Country:  country,
 		},
 	)
+
+	// Record custom metrics
+	RecordParseMetrics(len(address), len(parsed), "success")
+
 	c.JSON(http.StatusOK, parsed)
 }
 
@@ -265,6 +274,7 @@ var rootCmd = &cobra.Command{
 		r.UseH2C = viper.GetBool("h2c")
 		r.Use(gin.Recovery())
 		r.Use(ginzerolog.Logger("postal_server"))
+		r.Use(PrometheusMiddleware())
 		if viper.IsSet("trusted_proxies") {
 			r.SetTrustedProxies(viper.GetStringSlice("trusted_proxies"))
 		}
@@ -274,6 +284,9 @@ var rootCmd = &cobra.Command{
 
 		// status endpoint
 		r.GET("/status", StatusCheckHandler)
+
+		// metrics endpoint
+		r.GET("/metrics", gin.WrapH(promhttp.Handler()))
 
 		// swagger endpoint
 		r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
