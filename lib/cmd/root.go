@@ -14,7 +14,7 @@ import (
 
 	ginzerolog "github.com/dn365/gin-zerolog"
 	"github.com/gin-gonic/gin"
-	"github.com/le0pard/postal_server/version"
+	"github.com/pschlump/postal_server/lib/version"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
@@ -27,7 +27,7 @@ const EnvPrefix string = "POSTAL_SERVER"
 var (
 	cfgFile                      string
 	EnvStrReplacer               = strings.NewReplacer(".", "_")
-	Version                      = fmt.Sprintf("%s, date %s, build %s", version.Version, version.BuildTime, version.GitCommit)
+	Version                      = fmt.Sprintf("%s, date %s, build %s", version.Version, version.BuildDate, version.GitCommit)
 	queryParamToAddressComponent = map[string]uint16{
 		"address_name":         gopostalExpand.AddressName,
 		"address_house_number": gopostalExpand.AddressHouseNumber,
@@ -135,6 +135,11 @@ var rootCmd = &cobra.Command{
 
 		// healthcheck endpoint
 		r.GET("/health", func(c *gin.Context) {
+			c.JSON(http.StatusOK, gin.H{
+				"status": "ok",
+			})
+		})
+		r.GET("/status", func(c *gin.Context) {
 			c.JSON(http.StatusOK, gin.H{
 				"status": "ok",
 			})

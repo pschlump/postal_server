@@ -13,3 +13,10 @@
 
 .DS_Store
 dist/
+
+# Ignore compiled binary
+postal_server
+
+# Ignore temporary files
+,*
+bin/postal_server

@@ -4,7 +4,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/le0pard/postal_server/cmd"
+	"github.com/pschlump/postal_server/lib/cmd"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
