@@ -28,6 +28,7 @@ package version
 // Generation On: $(hostname)
 
 // Copyright (C) Philip Schlump 2026.
+// MIT Licensed.  See LICENSE file.
 
 var GitCommit string = "$GIT_COMMIT"
 var Version string = "$GIT_TAG"

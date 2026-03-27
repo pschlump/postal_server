@@ -14,12 +14,37 @@ import (
 
 	ginzerolog "github.com/dn365/gin-zerolog"
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
+
 	"github.com/pschlump/postal_server/lib/version"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+
+	_ "github.com/pschlump/postal_server/docs" // swagger docs
 )
+
+// @title           Postal Server API
+// @version         1.0
+// @description     Postal web server that grants access to the libpostal library, enabling the parsing and normalization of street addresses globally
+// @termsOfService  http://swagger.io/terms/
+
+// @contact.name   API Support
+// @contact.url    http://www.swagger.io/support
+// @contact.email  support@swagger.io
+
+// @license.name  Apache 2.0
+// @license.url   http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @host      localhost:8000
+// @BasePath  /
+
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
+// @description Type "Bearer" followed by a space and the token.
 
 // EnvPrefix for environment variables
 const EnvPrefix string = "POSTAL_SERVER"
@@ -113,6 +138,117 @@ func stringToBool(s string) bool {
 	return false
 }
 
+// HealthCheckHandler returns the health status
+// @Summary      Health check
+// @Description  Check if the server is running
+// @Tags         health
+// @Accept       json
+// @Produce      json
+// @Success      200  {object}  map[string]interface{}
+// @Router       /health [get]
+func HealthCheckHandler(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{
+		"status": "ok",
+	})
+}
+
+// StatusCheckHandler returns the server status
+// @Summary      Status check
+// @Description  Check server status
+// @Tags         health
+// @Accept       json
+// @Produce      json
+// @Success      200  {object}  map[string]interface{}
+// @Router       /status [get]
+func StatusCheckHandler(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{
+		"status": "ok",
+	})
+}
+
+// ExpandAddressHandler expands an address using libpostal
+// @Summary      Expand address
+// @Description  Expand an address using libpostal
+// @Tags         expand
+// @Accept       json
+// @Produce      json
+// @Param        address   query      string  true   "Address to expand"
+// @Param        languages query      string  false  "Languages for expansion"
+// @Param        latin_ascii query    string  false  "Convert to Latin ASCII"
+// @Param        transliterate query   string  false  "Transliterate"
+// @Param        strip_accents query   string  false  "Strip accents"
+// @Param        lowercase query       string  false  "Convert to lowercase"
+// @Param        trim_string query     string  false  "Trim string"
+// @Param        replace_word_hyphens query string  false  "Replace word hyphens"
+// @Param        delete_word_hyphens query  string  false  "Delete word hyphens"
+// @Param        replace_numeric_hyphens query string false "Replace numeric hyphens"
+// @Param        delete_numeric_hyphens query  string  false "Delete numeric hyphens"
+// @Param        split_alpha_from_numeric query string false "Split alpha from numeric"
+// @Param        delete_final_periods query    string  false "Delete final periods"
+// @Param        delete_acronym_periods query  string  false "Delete acronym periods"
+// @Param        drop_english_possessives query string false "Drop English possessives"
+// @Param        delete_apostrophes query  string  false "Delete apostrophes"
+// @Param        expand_numex query       string  false "Expand number expressions"
+// @Param        roman_numerals query     string  false "Handle Roman numerals"
+// @Success      200  {object}  []string
+// @Failure      400  {object}  map[string]string
+// @Router       /expand [get]
+func ExpandAddressHandler(c *gin.Context) {
+	queryParams := c.Request.URL.Query()
+	address := c.DefaultQuery("address", "")
+
+	options := gopostalExpand.GetDefaultExpansionOptions()
+	expansions := gopostalExpand.ExpandAddressOptions(
+		address,
+		mapQueryParamsOnExpandOptions(
+			options,
+			queryParams,
+		),
+	)
+	c.JSON(http.StatusOK, expansions)
+}
+
+// ParseAddressHandler parses an address using libpostal
+// @Summary      Parse address
+// @Description  Parse an address using libpostal
+// @Tags         parse
+// @Accept       json
+// @Produce      json
+// @Param        address  query      string  true   "Address to parse"
+// @Param        language query      string  false  "Language code"
+// @Param        country  query      string  false  "Country code"
+// @Success      200  {object}  []map[string]interface{}
+// @Failure      400  {object}  map[string]string
+// @Router       /parse [get]
+func ParseAddressHandler(c *gin.Context) {
+	address := c.DefaultQuery("address", "")
+	language := c.DefaultQuery("language", "")
+	country := c.DefaultQuery("country", "")
+
+	parsed := gopostalParser.ParseAddressOptions(
+		address,
+		gopostalParser.ParserOptions{
+			Language: language,
+			Country:  country,
+		},
+	)
+	c.JSON(http.StatusOK, parsed)
+}
+
+// ServerInfoHandler returns server version information
+// @Summary      Server info
+// @Description  Get server version information
+// @Tags         info
+// @Accept       json
+// @Produce      json
+// @Success      200  {object}  map[string]string
+// @Router       / [get]
+func ServerInfoHandler(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{
+		"version": Version,
+	})
+}
+
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:                   "postal_server",
@@ -134,16 +270,13 @@ var rootCmd = &cobra.Command{
 		}
 
 		// healthcheck endpoint
-		r.GET("/health", func(c *gin.Context) {
-			c.JSON(http.StatusOK, gin.H{
-				"status": "ok",
-			})
-		})
-		r.GET("/status", func(c *gin.Context) {
-			c.JSON(http.StatusOK, gin.H{
-				"status": "ok",
-			})
-		})
+		r.GET("/health", HealthCheckHandler)
+
+		// status endpoint
+		r.GET("/status", StatusCheckHandler)
+
+		// swagger endpoint
+		r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 		// basic auth
 		if viper.IsSet("basic_auth_username") && viper.IsSet("basic_auth_password") {
@@ -157,43 +290,13 @@ var rootCmd = &cobra.Command{
 		}
 
 		// expand libpostal
-		r.GET("/expand", func(c *gin.Context) {
-			queryParams := c.Request.URL.Query()
-			address := c.DefaultQuery("address", "")
-
-			options := gopostalExpand.GetDefaultExpansionOptions()
-			expansions := gopostalExpand.ExpandAddressOptions(
-				address,
-				mapQueryParamsOnExpandOptions(
-					options,
-					queryParams,
-				),
-			)
-			c.JSON(http.StatusOK, expansions)
-		})
+		r.GET("/expand", ExpandAddressHandler)
 
 		// parse libpostal
-		r.GET("/parse", func(c *gin.Context) {
-			address := c.DefaultQuery("address", "")
-			language := c.DefaultQuery("language", "")
-			country := c.DefaultQuery("country", "")
-
-			parsed := gopostalParser.ParseAddressOptions(
-				address,
-				gopostalParser.ParserOptions{
-					Language: language,
-					Country:  country,
-				},
-			)
-			c.JSON(http.StatusOK, parsed)
-		})
+		r.GET("/parse", ParseAddressHandler)
 
 		// root
-		r.GET("/", func(c *gin.Context) {
-			c.JSON(http.StatusOK, gin.H{
-				"version": Version,
-			})
-		})
+		r.GET("/", ServerInfoHandler)
 
 		r.Run(fmt.Sprintf("%s:%d", viper.GetString("host"), viper.GetInt("port")))
 	},

@@ -1,0 +1,307 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "Postal web server that grants access to the libpostal library, enabling the parsing and normalization of street addresses globally",
+        "title": "Postal Server API",
+        "termsOfService": "http://swagger.io/terms/",
+        "contact": {
+            "name": "API Support",
+            "url": "http://www.swagger.io/support",
+            "email": "support@swagger.io"
+        },
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        },
+        "version": "1.0"
+    },
+    "host": "localhost:8000",
+    "basePath": "/",
+    "paths": {
+        "/": {
+            "get": {
+                "description": "Get server version information",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "info"
+                ],
+                "summary": "Server info",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/expand": {
+            "get": {
+                "description": "Expand an address using libpostal",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "expand"
+                ],
+                "summary": "Expand address",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Address to expand",
+                        "name": "address",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Languages for expansion",
+                        "name": "languages",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Convert to Latin ASCII",
+                        "name": "latin_ascii",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Transliterate",
+                        "name": "transliterate",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Strip accents",
+                        "name": "strip_accents",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Convert to lowercase",
+                        "name": "lowercase",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Trim string",
+                        "name": "trim_string",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Replace word hyphens",
+                        "name": "replace_word_hyphens",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Delete word hyphens",
+                        "name": "delete_word_hyphens",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Replace numeric hyphens",
+                        "name": "replace_numeric_hyphens",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Delete numeric hyphens",
+                        "name": "delete_numeric_hyphens",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Split alpha from numeric",
+                        "name": "split_alpha_from_numeric",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Delete final periods",
+                        "name": "delete_final_periods",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Delete acronym periods",
+                        "name": "delete_acronym_periods",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Drop English possessives",
+                        "name": "drop_english_possessives",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Delete apostrophes",
+                        "name": "delete_apostrophes",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Expand number expressions",
+                        "name": "expand_numex",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Handle Roman numerals",
+                        "name": "roman_numerals",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/health": {
+            "get": {
+                "description": "Check if the server is running",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "health"
+                ],
+                "summary": "Health check",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/parse": {
+            "get": {
+                "description": "Parse an address using libpostal",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "parse"
+                ],
+                "summary": "Parse address",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Address to parse",
+                        "name": "address",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Language code",
+                        "name": "language",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Country code",
+                        "name": "country",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "additionalProperties": true
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/status": {
+            "get": {
+                "description": "Check server status",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "health"
+                ],
+                "summary": "Status check",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "BearerAuth": {
+            "description": "Type \"Bearer\" followed by a space and the token.",
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
+    }
+}

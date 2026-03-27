@@ -1,0 +1,207 @@
+basePath: /
+host: localhost:8000
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: Postal web server that grants access to the libpostal library, enabling
+    the parsing and normalization of street addresses globally
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Postal Server API
+  version: "1.0"
+paths:
+  /:
+    get:
+      consumes:
+      - application/json
+      description: Get server version information
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Server info
+      tags:
+      - info
+  /expand:
+    get:
+      consumes:
+      - application/json
+      description: Expand an address using libpostal
+      parameters:
+      - description: Address to expand
+        in: query
+        name: address
+        required: true
+        type: string
+      - description: Languages for expansion
+        in: query
+        name: languages
+        type: string
+      - description: Convert to Latin ASCII
+        in: query
+        name: latin_ascii
+        type: string
+      - description: Transliterate
+        in: query
+        name: transliterate
+        type: string
+      - description: Strip accents
+        in: query
+        name: strip_accents
+        type: string
+      - description: Convert to lowercase
+        in: query
+        name: lowercase
+        type: string
+      - description: Trim string
+        in: query
+        name: trim_string
+        type: string
+      - description: Replace word hyphens
+        in: query
+        name: replace_word_hyphens
+        type: string
+      - description: Delete word hyphens
+        in: query
+        name: delete_word_hyphens
+        type: string
+      - description: Replace numeric hyphens
+        in: query
+        name: replace_numeric_hyphens
+        type: string
+      - description: Delete numeric hyphens
+        in: query
+        name: delete_numeric_hyphens
+        type: string
+      - description: Split alpha from numeric
+        in: query
+        name: split_alpha_from_numeric
+        type: string
+      - description: Delete final periods
+        in: query
+        name: delete_final_periods
+        type: string
+      - description: Delete acronym periods
+        in: query
+        name: delete_acronym_periods
+        type: string
+      - description: Drop English possessives
+        in: query
+        name: drop_english_possessives
+        type: string
+      - description: Delete apostrophes
+        in: query
+        name: delete_apostrophes
+        type: string
+      - description: Expand number expressions
+        in: query
+        name: expand_numex
+        type: string
+      - description: Handle Roman numerals
+        in: query
+        name: roman_numerals
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              type: string
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Expand address
+      tags:
+      - expand
+  /health:
+    get:
+      consumes:
+      - application/json
+      description: Check if the server is running
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Health check
+      tags:
+      - health
+  /parse:
+    get:
+      consumes:
+      - application/json
+      description: Parse an address using libpostal
+      parameters:
+      - description: Address to parse
+        in: query
+        name: address
+        required: true
+        type: string
+      - description: Language code
+        in: query
+        name: language
+        type: string
+      - description: Country code
+        in: query
+        name: country
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              additionalProperties: true
+              type: object
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Parse address
+      tags:
+      - parse
+  /status:
+    get:
+      consumes:
+      - application/json
+      description: Check server status
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Status check
+      tags:
+      - health
+securityDefinitions:
+  BearerAuth:
+    description: Type "Bearer" followed by a space and the token.
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

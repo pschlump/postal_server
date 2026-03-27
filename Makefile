@@ -3,7 +3,7 @@ CMD     := ./cmd/server
 CLICMD     := ./cmd/http-server
 BIN_DIR := bin
 
-ADDR             ?= :9444
+ADDR             ?= 9444
 REGISTRATION_KEY ?= dev-registration-key
 
 .PHONY: build run test generate install-tools clean lint
@@ -16,8 +16,8 @@ build:
 
 ## run: run the server (set REGISTRATION_KEY env var for non-dev use)
 run:
-	REGISTRATION_KEY=$(REGISTRATION_KEY) ADDR=$(ADDR) \
-		go run $(CMD)
+	echo REGISTRATION_KEY=$(REGISTRATION_KEY) ADDR=$(ADDR) go run $(CMD)
+	./bin/postal_server --port $(ADDR)
 
 ## test: run all integration tests
 test:
@@ -45,7 +45,7 @@ clean:
 
 # git push origin v1.0.0
 git_set_tag:
-	git tag v0.0.8
-	echo git push origin --tags
+	git tag v0.0.10
+	git push origin --tags
 
 .DEFAULT_GOAL := build
